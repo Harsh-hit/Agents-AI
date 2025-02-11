@@ -73,7 +73,7 @@ def type_comment_in_autocad(comments):
         - Adjust the confidence and sleep times as needed.
     """
 
-    new_button_image = 'D:/MyData/personal projects/AI Agents/Agents-AI/agents/media/new_button.png'  # Path to the image file of the "New" button
+    new_button_image = 'D:/MyData/personal projects/AI Agents/Agents-AI/agents/media/new_button.png' 
     print("Searching for the 'New' button on screen...")
 
     button_location = None
