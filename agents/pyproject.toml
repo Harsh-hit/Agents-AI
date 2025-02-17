@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "agents"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "Its an agent that is able to create CAD drawings"
+authors = ["Gandhavalla Harshith <hgandavalla@gmail.com>"]
+packages = [{include = "agents"}]
 readme = "README.md"
 
 [tool.poetry.dependencies]

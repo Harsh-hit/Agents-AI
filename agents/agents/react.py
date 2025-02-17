@@ -24,10 +24,10 @@ def parse_string_to_list(input_str):
         return []
 
 
-def get_response_from_gemini(model: genai.GenerativeModel, prompt: str) -> list:
+def get_response_from_gemini(prompt: str) -> list:
     prompt = "Give AutoCAD commands to create " + prompt + """ Make sure to give only commands and nothing else. Format the comments in form of a list. \
-        For example, if you have to draw a line starting at (0,0) and ending at (1,1), your list of commands should be: ['line', '0,0', '4,4', 'ENTER']. \
-        After that add this default list ['ZOOM', 'C', '0,0', '100'] do not miss any element in the default list. So your end output must be ['line', '0,0', '4,4', 'ENTER', 'ZOOM', 'C', '0,0', '100']"""
+        For example, if you have to draw a line starting at (0,0) and ending at (1,1), your list of commands should be: ['line', '0,0', '4,4', 'ESC']. \
+        After that add this default list ['ZOOM', 'C', '0,0', '100'] do not miss any element in the default list. So your end output must be ['line', '0,0', '4,4','ESC', 'ZOOM', 'C', '0,0', '100']"""
     
     response = model.generate_content(prompt)
     result = parse_string_to_list(response.text)
@@ -53,7 +53,7 @@ def switch_to_autocad():
     Brings the active AutoCAD window to the foreground.
     """
     print("Bringing AutoCAD to the front...")
-    pyautogui.hotkey("alt", "tab")
+    pyautogui.hotkey("alt", "tab", interval=0.2)
     time.sleep(3)  # Wait for AutoCAD to be in focus
 
 
@@ -63,8 +63,24 @@ def open_autocad():
     """
     print("Opening AutoCAD...")
     subprocess.Popen([AUTOCAD_PATH])
-    time.sleep(20)
+    time.sleep(15)
     print("AutoCAD should now be open.")
+    new_button_image = '../agents/media/new_button.png' 
+    print("Searching for the 'New' button on screen...")
+
+    button_location = None
+    for _ in range(10):
+        button_location = pyautogui.locateOnScreen(new_button_image)
+        if button_location is not None:
+            break
+        time.sleep(1)
+    
+    if button_location is None:
+        print("Error: 'New' button not found. Please ensure the image is correct and visible on the screen.")
+        return
+    
+    print(f"'New' button located at: {button_location}. Clicking it...")
+    pyautogui.click(button_location)
 
 
 def type_comment_in_autocad(comments: list):
@@ -73,74 +89,17 @@ def type_comment_in_autocad(comments: list):
 
     Args:
         comments (list): List of AutoCAD commands to type.
-    """
+    """    
 
+    time.sleep(3)
     print("Typing commands in AutoCAD...")
     for comment in comments:
-        if comment.lower() == "enter":
-            pyautogui.press('enter')
+        if comment.lower() == "esc":
+            pyautogui.press('esc')
         else:
             pyautogui.write(comment, interval=0.7)
             print(comment)
             pyautogui.press('enter')
 
 
-def main():
-    user_command = input("Enter your command for the AI agent: ")
 
-    comment_to_type = get_response_from_gemini(model, user_command)
-    if not comment_to_type:
-        print("Failed to retrieve a response from Gemini. Exiting.")
-        return
-
-    print("Gemini response:", comment_to_type)
-
-    if is_autocad_running():
-        print("AutoCAD is already open. Switching to the window...")
-        switch_to_autocad()
-    else:
-        open_autocad()
-
-    type_comment_in_autocad(comment_to_type)
-    print("Operation complete.")
-
-
-st.title("AI-Powered AutoCAD Drawing Assistant")
-
-if "AUTOCAD_PATH" not in st.session_state:
-    st.session_state["AUTOCAD_PATH"] = ""
-
-if "step" not in st.session_state:
-    st.session_state["step"] = "autocad_path"
-
-if st.session_state["step"] == "autocad_path":
-    st.header("Step 1: Enter AutoCAD Path")
-    autocad_path = st.text_input("Enter the full path to AutoCAD executable:", 
-                                 value=st.session_state["AUTOCAD_PATH"])
-    if st.button("Next"):
-        st.session_state["AUTOCAD_PATH"] = autocad_path
-        st.session_state["step"] = "drawing_command"
-        st.rerun()
-
-elif st.session_state["step"] == "drawing_command":
-    st.header("Step 2: Describe What You Want to Draw")
-    user_command = st.text_input("Enter your drawing request:")
-    if st.button("Generate and Execute"):
-        if not st.session_state["AUTOCAD_PATH"]:
-            st.error("AutoCAD path is required!")
-        else:
-            with st.spinner("Generating commands and checking AutoCAD..."):
-                comment_to_type = get_response_from_gemini(model, user_command)
-                if not comment_to_type:
-                    st.error("Failed to retrieve a response from Gemini.")
-                else:
-                    st.success("Commands generated successfully!")
-                    st.write("**Generated Commands:**", comment_to_type)
-                    
-                    if is_autocad_running():
-                        switch_to_autocad()
-                    else:
-                        open_autocad()
-                    
-                    type_comment_in_autocad(comment_to_type)
-                    st.success("Operation complete.")
