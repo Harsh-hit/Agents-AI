@@ -1,4 +1,6 @@
 import streamlit as st
+from streamlit_drawable_canvas import st_canvas
+from PIL import Image
 from agents import react
 
 st.title("AI-Powered AutoCAD Drawing Assistant")
@@ -23,8 +25,27 @@ elif st.session_state["step"] == "drawing_command":
     
     # Option to choose between text and speech input
     input_method = st.radio("Choose input method:", ("Text", "Speech"))
-    uploaded_image = st.file_uploader("Upload an image (optional):", type=["png", "jpg", "jpeg"])
     
+    image_method = st.radio("Do you want to draw or upload a reference image?", ("Upload", "Draw"))
+    
+    uploaded_image = None
+    
+    if image_method == "Upload":
+        uploaded_image = st.file_uploader("Upload an image (optional):", type=["png", "jpg", "jpeg"])
+    else:
+        st.header("Or Draw Your Image")
+        canvas_result = st_canvas(
+            fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
+            stroke_width=2,
+            stroke_color="#000000",
+            background_color="#FFFFFF",
+            update_streamlit=True,
+            height=300,
+            width=300,
+            drawing_mode="freedraw",
+            key="canvas",
+        )
+
     user_command = ""
     if input_method == "Text":
         st.session_state["user_command"] = st.text_input("Enter your drawing request:")
@@ -33,6 +54,7 @@ elif st.session_state["step"] == "drawing_command":
             user_command = react.get_speech_input()
             st.text(f"Recognized speech: {user_command}")
             st.session_state["user_command"] = user_command
+
     if st.button("Generate and Execute"):
         if not st.session_state["AUTOCAD_PATH"]:
             st.error("AutoCAD path is required!")
@@ -40,8 +62,15 @@ elif st.session_state["step"] == "drawing_command":
             with st.spinner("Generating commands and checking AutoCAD..."):
                 if uploaded_image:
                     comment_to_type = react.image_response_from_gemini(st.session_state["user_command"], uploaded_image)
+                elif canvas_result.image_data is not None:
+                    # Save the drawn image to a temporary file
+                    image = Image.fromarray(canvas_result.image_data.astype('uint8'), 'RGBA')
+                    temp_image_path = "temp_drawn_image.png"
+                    image.save(temp_image_path)
+                    comment_to_type = react.image_response_from_gemini(st.session_state["user_command"], temp_image_path)
                 else:
                     comment_to_type = react.get_response_from_gemini(st.session_state["user_command"])
+                
                 if not comment_to_type:
                     st.error("Failed to retrieve a response from Gemini.")
                 else:
