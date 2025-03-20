@@ -23,10 +23,11 @@ elif st.session_state["step"] == "drawing_command":
     
     # Option to choose between text and speech input
     input_method = st.radio("Choose input method:", ("Text", "Speech"))
+    uploaded_image = st.file_uploader("Upload an image (optional):", type=["png", "jpg", "jpeg"])
     
     user_command = ""
     if input_method == "Text":
-        user_command = st.text_input("Enter your drawing request:")
+        st.session_state["user_command"] = st.text_input("Enter your drawing request:")
     else:
         if st.button("Listening"):
             user_command = react.get_speech_input()
@@ -37,7 +38,10 @@ elif st.session_state["step"] == "drawing_command":
             st.error("AutoCAD path is required!")
         else:
             with st.spinner("Generating commands and checking AutoCAD..."):
-                comment_to_type = react.get_response_from_gemini(st.session_state["user_command"])
+                if uploaded_image:
+                    comment_to_type = react.image_response_from_gemini(st.session_state["user_command"], uploaded_image)
+                else:
+                    comment_to_type = react.get_response_from_gemini(st.session_state["user_command"])
                 if not comment_to_type:
                     st.error("Failed to retrieve a response from Gemini.")
                 else:

@@ -1,12 +1,12 @@
 import subprocess
-import streamlit as st
 import os
 import time
 import pyautogui
 import psutil
 import google.generativeai as genai
 import ast
-import speech_recognition as sr  # Added import for speech recognition
+import speech_recognition as sr 
+import PIL.Image
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -35,6 +35,15 @@ def get_response_from_gemini(prompt: str) -> list:
     print(result)
     return result
 
+def image_response_from_gemini(prompt: str, image_path:str) -> list:
+    prompt = "Use the image as reference. Give AutoCAD commands to create " + prompt + """ Make sure to give only commands and nothing else. Format the comments in form of a list. \
+        For example, if you have to draw a line starting at (0,0) and ending at (1,1), your list of commands should be: ['line', '0,0', '4,4', 'ESC']. \
+        After that add this default list ['ZOOM', 'C', '0,0', '100'] do not miss any element in the default list. So your end output must be ['line', '0,0', '4,4','ESC', 'ZOOM', 'C', '0,0', '100']"""
+    image = PIL.Image.open(image_path)
+    response = model.generate_content(contents=[prompt, image])
+    result = parse_string_to_list(response.text)
+    print(result)
+    return result
 
 def get_speech_input() -> str:
     """
