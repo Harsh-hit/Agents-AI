@@ -1,7 +1,6 @@
 import streamlit as st
 from agents import react
 
-
 st.title("AI-Powered AutoCAD Drawing Assistant")
 
 if "AUTOCAD_PATH" not in st.session_state:
@@ -21,13 +20,24 @@ if st.session_state["step"] == "autocad_path":
 
 elif st.session_state["step"] == "drawing_command":
     st.header("Step 2: Describe What You Want to Draw")
-    user_command = st.text_input("Enter your drawing request:")
+    
+    # Option to choose between text and speech input
+    input_method = st.radio("Choose input method:", ("Text", "Speech"))
+    
+    user_command = ""
+    if input_method == "Text":
+        user_command = st.text_input("Enter your drawing request:")
+    else:
+        if st.button("Listening"):
+            user_command = react.get_speech_input()
+            st.text(f"Recognized speech: {user_command}")
+            st.session_state["user_command"] = user_command
     if st.button("Generate and Execute"):
         if not st.session_state["AUTOCAD_PATH"]:
             st.error("AutoCAD path is required!")
         else:
             with st.spinner("Generating commands and checking AutoCAD..."):
-                comment_to_type = react.get_response_from_gemini( user_command)
+                comment_to_type = react.get_response_from_gemini(st.session_state["user_command"])
                 if not comment_to_type:
                     st.error("Failed to retrieve a response from Gemini.")
                 else:
