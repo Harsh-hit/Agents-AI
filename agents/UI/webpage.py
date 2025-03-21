@@ -26,25 +26,20 @@ elif st.session_state["step"] == "drawing_command":
     # Option to choose between text and speech input
     input_method = st.radio("Choose input method:", ("Text", "Speech"))
     
-    image_method = st.radio("Do you want to draw or upload a reference image?", ("Upload", "Draw"))
-    
-    uploaded_image = None
-    
-    if image_method == "Upload":
-        uploaded_image = st.file_uploader("Upload an image (optional):", type=["png", "jpg", "jpeg"])
-    else:
-        st.header("Or Draw Your Image")
-        canvas_result = st_canvas(
-            fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
-            stroke_width=2,
-            stroke_color="#000000",
-            background_color="#FFFFFF",
-            update_streamlit=True,
-            height=300,
-            width=300,
-            drawing_mode="freedraw",
-            key="canvas",
-        )
+    uploaded_image = st.file_uploader("Upload an image (optional):", type=["png", "jpg", "jpeg"])
+
+    st.header("Or Draw Your Image")
+    canvas_result = st_canvas(
+        fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
+        stroke_width=2,
+        stroke_color="#000000",
+        background_color="#FFFFFF",
+        update_streamlit=True,
+        height=300,
+        width=300,
+        drawing_mode="freedraw",
+        key="canvas",
+    )
 
     user_command = ""
     if input_method == "Text":

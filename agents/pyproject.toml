@@ -19,6 +19,9 @@ psutil = "^6.1.1"
 speechrecognition = "^3.14.1"
 pyaudio = "^0.2.14"
 streamlit-drawable-canvas = "^0.9.3"
+pypdf = "^5.4.0"
+pypdf2 = "^3.0.1"
+pandas = "^2.2.3"
 
 [build-system]
 requires = ["poetry-core"]
