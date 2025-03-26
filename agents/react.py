@@ -26,9 +26,33 @@ def parse_string_to_list(input_str):
 
 
 def get_response_from_gemini(prompt: str) -> list:
-    prompt = "Give AutoCAD commands to create " + prompt + """ Make sure to give only commands and nothing else. Format the comments in form of a list. \
-        For example, if you have to draw a line starting at (0,0) and ending at (1,1), your list of commands should be: ['line', '0,0', '4,4', 'ESC']. \
-        After that add this default list ['ZOOM', 'C', '0,0', '100'] do not miss any element in the default list. So your end output must be ['line', '0,0', '4,4','ESC', 'ZOOM', 'C', '0,0', '100']"""
+    prompt = f"""
+    **Description:**
+    Generate a sequence of AutoCAD commands to create a specified object. The response should only
+    include AutoCAD commands without any additional text or explanations. The commands should be,
+    formatted as a list, with a specific structure and A default list of commands `['ZOOM', 'C', '0,0', '100']` 
+    must always be appended at the end of the 
+    generated command sequence.
+    
+    **Question:**
+    draw a line from `(0,0)` to `(1,1)` and then a line from `(1,1)` to `(2,2)`
+    
+    **Reasoning:**
+    1. First 'line' command is used, then starting point is specified '0,0' and ending point is specified '1,1'.
+    2. Next endpoint is '2,2', it is at distance 1 from x and 1 from y of the previous endpoint. So the final endpoint is '1,1'.
+    3. The command 'ESC' is used to exit the line drawing mode.
+    4. A default list of commands `['ZOOM', 'C', '0,0', '100']` must always be appended at the end of the 
+    generated command sequence.
+    5. The expected output should be:
+       ```
+       ['line', '0,0', '1,1', '1,1', 'ESC', 'ZOOM', 'C', '0,0', '100']
+       ```
+    
+    **Output:**
+    A Python list containing the AutoCAD commands, strictly formatted as described.
+
+    Now, generate AutoCAD commands for: {prompt}
+    """
     
     response = model.generate_content(prompt)
     result = parse_string_to_list(response.text)
@@ -36,9 +60,33 @@ def get_response_from_gemini(prompt: str) -> list:
     return result
 
 def image_response_from_gemini(prompt: str, image_path:str) -> list:
-    prompt = "Use the image as reference. Give AutoCAD commands to create " + prompt + """ Make sure to give only commands and nothing else. Format the comments in form of a list. \
-        For example, if you have to draw a line starting at (0,0) and ending at (1,1), your list of commands should be: ['line', '0,0', '4,4', 'ESC']. \
-        After that add this default list ['ZOOM', 'C', '0,0', '100'] do not miss any element in the default list. So your end output must be ['line', '0,0', '4,4','ESC', 'ZOOM', 'C', '0,0', '100']"""
+    prompt = f"""
+    **Description:**
+    Use the image as a reference and Generate a sequence of AutoCAD commands to create a specified object. The response should only
+    include AutoCAD commands without any additional text or explanations. The commands should be,
+    formatted as a list, with a specific structure and A default list of commands `['ZOOM', 'C', '0,0', '100']` 
+    must always be appended at the end of the 
+    generated command sequence.
+    
+    **Question:**
+    draw a line from `(0,0)` to `(1,1)` and then a line from `(1,1)` to `(2,2)`
+    
+    **Reasoning:**
+    1. First 'line' command is used, then starting point is specified '0,0' and ending point is specified '1,1'.
+    2. Next endpoint is '2,2', it is at distance 1 from x and 1 from y of the previous endpoint. So the final endpoint is '1,1'.
+    3. The command 'ESC' is used to exit the line drawing mode.
+    4. A default list of commands `['ZOOM', 'C', '0,0', '100']` must always be appended at the end of the 
+    generated command sequence.
+    5. The expected output should be:
+       ```
+       ['line', '0,0', '1,1', '1,1', 'ESC', 'ZOOM', 'C', '0,0', '100']
+       ```
+    
+    **Output:**
+    A Python list containing the AutoCAD commands, strictly formatted as described.
+
+    Now, generate AutoCAD commands for: {prompt}
+    """
     image = PIL.Image.open(image_path)
     response = model.generate_content(contents=[prompt, image])
     result = parse_string_to_list(response.text)
@@ -85,6 +133,7 @@ def switch_to_autocad():
     Brings the active AutoCAD window to the foreground.
     """
     print("Bringing AutoCAD to the front...")
+    time.sleep(1)
     pyautogui.hotkey("alt", "tab", interval=0.2)
     time.sleep(3)  # Wait for AutoCAD to be in focus
 
@@ -95,9 +144,9 @@ def open_autocad():
     """
     print("Opening AutoCAD...")
     subprocess.Popen([AUTOCAD_PATH])
-    time.sleep(15)
+    time.sleep(20)
     print("AutoCAD should now be open.")
-    new_button_image = '../agents/media/new_button.png' 
+    new_button_image = './media/new_button.png' 
     print("Searching for the 'New' button on screen...")
 
     button_location = None
@@ -115,7 +164,27 @@ def open_autocad():
     pyautogui.click(button_location)
 
 
-def type_comment_in_autocad(comments: list):
+def type_comment_in_autocad(comments: list[str]):
+    """
+    Types the provided commands in AutoCAD.
+
+    Args:
+        comments (list): List of AutoCAD commands to type.
+    """    
+
+    time.sleep(3)
+    print("Typing commands in AutoCAD...")
+    for comment in comments:
+        if comment.lower() == "esc":
+            pyautogui.press('esc')
+        else:
+            pyautogui.write(comment, interval=0.3)
+            print(comment)
+            pyautogui.press('enter')
+
+
+
+def test_type_comment_in_autocad(comments: list[str]):
     """
     Types the provided commands in AutoCAD.
 
@@ -132,6 +201,8 @@ def type_comment_in_autocad(comments: list):
             pyautogui.write(comment, interval=0.7)
             print(comment)
             pyautogui.press('enter')
-
-
-
+    
+    time.sleep(1)
+    pyautogui.hotkey("ctrl", "n")
+    time.sleep(1)
+    pyautogui.hotkey('enter')

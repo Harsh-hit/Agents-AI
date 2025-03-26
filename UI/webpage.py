@@ -11,6 +11,13 @@ if "AUTOCAD_PATH" not in st.session_state:
 if "step" not in st.session_state:
     st.session_state["step"] = "autocad_path"
 
+if "listen" not in st.session_state:
+    st.session_state["listen"] = True
+
+
+if "user_command" not in st.session_state:
+    st.session_state["user_command"] = ""
+
 if st.session_state["step"] == "autocad_path":
     st.header("Step 1: Enter AutoCAD Path")
     autocad_path = st.text_input("Enter the full path to AutoCAD executable:", 
@@ -45,11 +52,17 @@ elif st.session_state["step"] == "drawing_command":
     if input_method == "Text":
         st.session_state["user_command"] = st.text_input("Enter your drawing request:")
     else:
-        if st.button("Listening"):
+        if st.button("Listen"):
+            st.session_state["user_command"] = ""
+            st.session_state["listen"] = True
+        if st.button("Stop Listening"):
+            st.session_state["listen"] = False
+        while (st.session_state["listen"]):
             user_command = react.get_speech_input()
             st.text(f"Recognized speech: {user_command}")
-            st.session_state["user_command"] = user_command
+            st.session_state["user_command"] += user_command
 
+    print(st.session_state["user_command"])
     if st.button("Generate and Execute"):
         if not st.session_state["AUTOCAD_PATH"]:
             st.error("AutoCAD path is required!")

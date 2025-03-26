@@ -1,0 +1,17 @@
+1. Draw a square of side length 5
+2. Draw an equilateral triangle of side length 4
+3. Draw a cuboid of side length 7
+4. Draw a circle with center at 5,10 and radius 5
+5. Draw a sphere of radius 20 and add a cylinder passing through its center with radius 10 and height 50, the center of the cyclinder and sphere must be same
+6. Draw two cones such that the tips of the cones are touching each other, both of them have base radius 35 and height 10
+7. Draw a hexagon of side length 3
+8. Draw a pyramid with a regular square base of side length 6 and height 10
+9. Draw a rectangle with a width of 8 and a height of 4.
+10. Draw a right-angled triangle with base 6 and height 5.
+11. Draw a parallelogram with base 7 and height 3, with an angle of 30 degrees between the base and the adjacent side.
+12. Draw a cylinder with a base radius of 6 and a height of 15.
+13. Draw a cube with a side length of 5.
+14. Draw a trapezium with bases of length 10 and 6, and a height of 4.
+15. Draw a hemisphere with a radius of 12.
+16. Draw a rectangular prism with a width of 4, a depth of 3, and a height of 7.
+17. Draw a sewing needle of height 10, the lenght of the hole is 0.5 and width is 0.1, assume other dimensions
