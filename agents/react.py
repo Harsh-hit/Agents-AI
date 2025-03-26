@@ -178,7 +178,7 @@ def type_comment_in_autocad(comments: list[str]):
         if comment.lower() == "esc":
             pyautogui.press('esc')
         else:
-            pyautogui.write(comment, interval=0.3)
+            pyautogui.write(comment, interval=0.5)
             print(comment)
             pyautogui.press('enter')
 
