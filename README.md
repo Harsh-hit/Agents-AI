@@ -2,8 +2,8 @@
 
 This project integrates Google Gemini AI with AutoCAD to generate and execute AutoCAD commands based on user input. It automates drawing creation by interpreting natural language prompts and simulating keystrokes.
 
-<video width="600" controls>
-  <source src="./media/Video Project 1.gif" type="image/gif">
+<video width="600" controls loop>
+  <source src="./media/Video Project 1.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
